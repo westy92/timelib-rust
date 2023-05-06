@@ -22,6 +22,10 @@ jobs:
     - name: Lint
       run: cargo fmt --all -- --check
 
+    - name: Install re2c
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: sudo apt-get install -y re2c
+
 #    - name: Install tarpaulin
 #      if: ${{ matrix.os == 'ubuntu-latest' }}
 #      run: cargo install cargo-tarpaulin
