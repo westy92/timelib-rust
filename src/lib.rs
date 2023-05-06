@@ -24,7 +24,7 @@ pub fn strtotime(
             error_code_ptr,
         );
         if tzi.is_null() {
-            return Err("Invalid timezone.".into());
+            return Err(format!("Invalid timezone. Err: {error_code}."));
         }
 
         let base = timelib_time_ctor();
@@ -88,7 +88,7 @@ mod tests {
     fn test_strtotime_invalid_timezone() {
         let result = strtotime("today".into(), None, Some("pizza".into()));
         assert!(result.is_err());
-        assert_eq!("Invalid timezone.", result.unwrap_err());
+        assert_eq!("Invalid timezone. Err: 6.", result.unwrap_err());
     }
 
     #[test]
