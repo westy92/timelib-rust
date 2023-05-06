@@ -1,0 +1,3 @@
+[submodule "ext/timelib"]
+	path = ext/timelib
+	url = git@github.com:derickr/timelib.git
