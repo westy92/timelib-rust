@@ -91,12 +91,54 @@ mod tests {
         assert_eq!("Invalid timezone.", result.unwrap_err());
     }
 
-    /*#[test]
+    #[test]
     fn test_strtotime_invalid_date_time() {
         let result = strtotime("derp".into(), None, None);
         assert!(result.is_err());
         assert_eq!("Invalid date_time string.", result.unwrap_err());
-    }*/
+    }
 
-    // TODO more tests
+    #[test]
+    fn test_strtotime_valid_date_time_fixed() {
+        let result = strtotime("jun 4 2022".into(), None, None);
+        assert!(result.is_ok());
+        assert_eq!(1654300800, result.unwrap());
+    }
+
+    #[test]
+    fn test_strtotime_valid_date_time_fixed_timezone() {
+        let result = strtotime("jun 4 2022".into(), None, Some("America/Chicago".into()));
+        assert!(result.is_ok());
+        assert_eq!(1654318800, result.unwrap());
+    }
+
+    const SEC_PER_DAY: i64 = 86_400;
+
+    #[test]
+    fn test_strtotime_valid_date_time_relative() {
+        let result = strtotime("tomorrow".into(), None, None);
+        assert!(result.is_ok());
+        let result = result.unwrap();
+        let now = rust_now_sec();
+        assert!(now <= result);
+        assert!(now + SEC_PER_DAY >= result);
+    }
+
+    #[test]
+    fn test_strtotime_valid_date_time_relative_base() {
+        let today = 1654318823; // Saturday, June 4, 2022 5:00:23 AM GMT
+        let tomorrow = 1654387200; // Sunday, June 5, 2022 12:00:00 AM GMT
+        let result = strtotime("tomorrow".into(), Some(today), None);
+        assert!(result.is_ok());
+        assert_eq!(tomorrow, result.unwrap());
+    }
+
+    #[test]
+    fn test_strtotime_valid_date_time_relative_base_timezone() {
+        let today = 1654318823; // Saturday, June 4, 2022 12:00:23 AM GMT-05:00 DST
+        let tomorrow = 1654405200; // Sunday, June 5, 2022 12:00:00 AM GMT-05:00 DST
+        let result = strtotime("tomorrow".into(), Some(today), Some("America/Chicago".into()));
+        assert!(result.is_ok());
+        assert_eq!(tomorrow, result.unwrap());
+    }
 }
