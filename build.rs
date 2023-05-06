@@ -25,27 +25,32 @@ fn main() {
     ];
 
     let mut builder = cc::Build::new();
-    let build = builder
+    let mut build = builder
         .files(src.iter())
         .include("ext/timelib")
         // taken from Makefile
-        .flag("-O0")
-        .flag("-ggdb3")
         .flag("-Wall")
-        .flag("-fdiagnostics-show-option")
-        .flag("-fno-exceptions")
-        .flag("-fno-omit-frame-pointer")
-        .flag("-fno-optimize-sibling-calls")
-        //.flag("-fsanitize=address")
-        //.flag("-fsanitize=undefined")
-        .flag("-fstack-protector")
-        .flag("-pedantic")
         .define("HAVE_STDINT_H", None)
         .define("HAVE_GETTIMEOFDAY", None)
         .define("HAVE_UNISTD_H", None)
         .define("HAVE_DIRENT_H", None)
         .define("HAVE_STDINT_H", None)
         .define("HAVE_STDINT_H", None);
+
+    if !std::env::var_os("CARGO_CFG_WINDOWS").is_some() {
+        // extra parameters to use in non-Windows
+        build = build
+            .flag("-O0")
+            .flag("-ggdb3")
+            .flag("-fdiagnostics-show-option")
+            .flag("-fno-exceptions")
+            .flag("-fno-omit-frame-pointer")
+            .flag("-fno-optimize-sibling-calls")
+            //.flag("-fsanitize=address")
+            //.flag("-fsanitize=undefined")
+            .flag("-fstack-protector")
+            .flag("-pedantic");
+    }
 
     build.compile("timelib");
 }
