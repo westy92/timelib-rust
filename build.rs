@@ -8,8 +8,6 @@ fn main() {
     re2c("parse_date");
     re2c("parse_iso_intervals");
 
-    println!("cargo:rustc-link-lib=m");
-
     let src = [
         "ext/timelib/astro.c",
         "ext/timelib/dow.c",
@@ -39,6 +37,8 @@ fn main() {
             .define("HAVE_UNISTD_H", Some("0"));
     } else {
         // extra parameters to use in non-Windows
+        println!("cargo:rustc-link-lib=m");
+
         build = build
             .flag("-O0")
             .flag("-ggdb3")
