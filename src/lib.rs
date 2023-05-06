@@ -1,6 +1,9 @@
 mod internal;
 
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::{
+    ffi::CString,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 use internal::*;
 
@@ -13,16 +16,13 @@ pub fn strtotime(
         return Err("Empty input string.".into());
     }
 
-    let tz = timezone.unwrap_or("UTC".into());
+    let tz_c_str = CString::new(timezone.unwrap_or("UTC".into())).unwrap();
+    let date_time_c_str = CString::new(date_time.to_owned()).unwrap();
     let mut error_code: i32 = 0;
     let error_code_ptr = &mut error_code as *mut i32;
 
     unsafe {
-        let tzi = timelib_parse_tzfile(
-            tz.as_ptr() as *const i8,
-            timelib_builtin_db(),
-            error_code_ptr,
-        );
+        let tzi = timelib_parse_tzfile(tz_c_str.as_ptr(), timelib_builtin_db(), error_code_ptr);
         if tzi.is_null() {
             return Err(format!("Invalid timezone. Err: {error_code}."));
         }
@@ -34,8 +34,8 @@ pub fn strtotime(
 
         let mut error = std::mem::MaybeUninit::uninit();
         let parsed_time = timelib_strtotime(
-            date_time.as_ptr() as *const i8,
-            date_time.len().try_into().unwrap(),
+            date_time_c_str.as_ptr(),
+            date_time_c_str.to_bytes().len() as u64,
             error.as_mut_ptr(),
             timelib_builtin_db(),
             Some(cached_tzfile_wrapper),
