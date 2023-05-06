@@ -33,7 +33,6 @@ fn main() {
         .flag("-ggdb3")
         .flag("-Wall")
         //.flag("-Werror")
-        .flag("-Wempty-body")
         .flag("-Wenum-compare")
         .flag("-Wformat-nonliteral")
         .flag("-Wformat-security")
@@ -70,7 +69,7 @@ fn main() {
 
     if !std::env::var_os("CARGO_CFG_WINDOWS").is_some() {
         // extra parameters to use in non-Windows
-        build = build.flag("-Wextra");
+        build = build.flag("-Wextra").flag("-Wempty-body");
     }
 
     build.compile("timelib");
