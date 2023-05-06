@@ -70,8 +70,7 @@ fn main() {
 
     if !std::env::var_os("CARGO_CFG_WINDOWS").is_some() {
         // extra parameters to use in non-Windows
-        build = build
-            .flag("-Wextra");
+        build = build.flag("-Wextra");
     }
 
     build.compile("timelib");
