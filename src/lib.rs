@@ -4,7 +4,11 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use internal::*;
 
-pub fn strtotime(date_time: String, base_timestamp: Option<i64>, timezone: Option<String>) -> Result<i64, String> {
+pub fn strtotime(
+    date_time: String,
+    base_timestamp: Option<i64>,
+    timezone: Option<String>,
+) -> Result<i64, String> {
     if date_time.is_empty() {
         return Err("Empty input string.".into());
     }
@@ -14,7 +18,11 @@ pub fn strtotime(date_time: String, base_timestamp: Option<i64>, timezone: Optio
     let error_code_ptr = &mut error_code as *mut i32;
 
     unsafe {
-        let tzi = timelib_parse_tzfile(tz.as_ptr() as *const i8, timelib_builtin_db(), error_code_ptr);
+        let tzi = timelib_parse_tzfile(
+            tz.as_ptr() as *const i8,
+            timelib_builtin_db(),
+            error_code_ptr,
+        );
         if tzi.is_null() {
             return Err("Invalid timezone.".into());
         }
