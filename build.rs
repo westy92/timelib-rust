@@ -25,33 +25,13 @@ fn main() {
     ];
 
     let mut builder = cc::Build::new();
-    let mut build = builder
+    let build = builder
         .files(src.iter())
         .include("ext/timelib")
         // taken from Makefile
         .flag("-O0")
         .flag("-ggdb3")
         .flag("-Wall")
-        //.flag("-Werror")
-        .flag("-Wenum-compare")
-        .flag("-Wformat-nonliteral")
-        .flag("-Wformat-security")
-        .flag("-Wimplicit-fallthrough")
-        .flag("-Winit-self")
-        .flag("-Wlogical-not-parentheses")
-        //.flag("-Wlogical-op")
-        //.flag("-Wmaybe-uninitialized")
-        .flag("-Wmissing-field-initializers")
-        .flag("-Wmissing-format-attribute")
-        .flag("-Wno-unused-parameter")
-        .flag("-Wparentheses")
-        .flag("-Wpointer-arith")
-        .flag("-Wshadow")
-        .flag("-Wsign-compare")
-        .flag("-Wsizeof-array-argument")
-        .flag("-Wunused-but-set-variable")
-        .flag("-Wvariadic-macros")
-        .flag("-Wwrite-strings")
         .flag("-fdiagnostics-show-option")
         .flag("-fno-exceptions")
         .flag("-fno-omit-frame-pointer")
@@ -66,11 +46,6 @@ fn main() {
         .define("HAVE_DIRENT_H", None)
         .define("HAVE_STDINT_H", None)
         .define("HAVE_STDINT_H", None);
-
-    if !std::env::var_os("CARGO_CFG_WINDOWS").is_some() {
-        // extra parameters to use in non-Windows
-        build = build.flag("-Wextra").flag("-Wempty-body");
-    }
 
     build.compile("timelib");
 }
