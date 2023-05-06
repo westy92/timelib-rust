@@ -25,7 +25,7 @@ fn main() {
     ];
 
     let mut builder = cc::Build::new();
-    let build = builder
+    let mut build = builder
         .files(src.iter())
         .include("ext/timelib")
         // taken from Makefile
@@ -33,7 +33,6 @@ fn main() {
         .flag("-ggdb3")
         .flag("-Wall")
         //.flag("-Werror")
-        .flag("-Wextra")
         .flag("-Wempty-body")
         .flag("-Wenum-compare")
         .flag("-Wformat-nonliteral")
@@ -68,6 +67,12 @@ fn main() {
         .define("HAVE_DIRENT_H", None)
         .define("HAVE_STDINT_H", None)
         .define("HAVE_STDINT_H", None);
+
+    if !std::env::var_os("CARGO_CFG_WINDOWS").is_some() {
+        // extra parameters to use in non-Windows
+        build = build
+            .flag("-Wextra");
+    }
 
     build.compile("timelib");
 }
