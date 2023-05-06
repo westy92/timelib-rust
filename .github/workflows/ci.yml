@@ -42,7 +42,7 @@ jobs:
 
     - name: Build and Test (Coverage)
       if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: cargo tarpaulin --out Xml*/
+      run: cargo tarpaulin --out Xml
 
     - name: Build and Test (No Coverage)
       if: ${{ matrix.os != 'ubuntu-latest' }}
