@@ -1,14 +1,24 @@
 use std::{
+    env,
     fs::File,
     process::{Command, Stdio},
 };
 
+use bindgen::builder;
+
 fn main() {
+    let bindings = builder()
+        .header("ext/timelib/timelib.h")
+        .generate()
+        .expect("failed to run bindgen");
+
+    bindings
+        .write_to_file("src/bindings.rs")
+        .expect("failed to write bindings.rs");
+
     // run re2c on 2 files
     re2c("parse_date");
     re2c("parse_iso_intervals");
-
-    println!("cargo:rustc-link-lib=m");
 
     let src = [
         "ext/timelib/astro.c",
@@ -25,49 +35,36 @@ fn main() {
     ];
 
     let mut builder = cc::Build::new();
-    let build = builder
+    let mut build = builder
         .files(src.iter())
         .include("ext/timelib")
         // taken from Makefile
-        .flag("-O0")
-        .flag("-ggdb3")
         .flag("-Wall")
-        //.flag("-Werror")
-        .flag("-Wextra")
-        .flag("-Wempty-body")
-        .flag("-Wenum-compare")
-        .flag("-Wformat-nonliteral")
-        .flag("-Wformat-security")
-        .flag("-Wimplicit-fallthrough")
-        .flag("-Winit-self")
-        .flag("-Wlogical-not-parentheses")
-        //.flag("-Wlogical-op")
-        //.flag("-Wmaybe-uninitialized")
-        .flag("-Wmissing-field-initializers")
-        .flag("-Wmissing-format-attribute")
-        .flag("-Wno-unused-parameter")
-        .flag("-Wparentheses")
-        .flag("-Wpointer-arith")
-        .flag("-Wshadow")
-        .flag("-Wsign-compare")
-        .flag("-Wsizeof-array-argument")
-        .flag("-Wunused-but-set-variable")
-        .flag("-Wvariadic-macros")
-        .flag("-Wwrite-strings")
-        .flag("-fdiagnostics-show-option")
-        .flag("-fno-exceptions")
-        .flag("-fno-omit-frame-pointer")
-        .flag("-fno-optimize-sibling-calls")
-        //.flag("-fsanitize=address")
-        //.flag("-fsanitize=undefined")
-        .flag("-fstack-protector")
-        .flag("-pedantic")
         .define("HAVE_STDINT_H", None)
-        .define("HAVE_GETTIMEOFDAY", None)
-        .define("HAVE_UNISTD_H", None)
-        .define("HAVE_DIRENT_H", None)
-        .define("HAVE_STDINT_H", None)
-        .define("HAVE_STDINT_H", None);
+        .define("HAVE_GETTIMEOFDAY", None);
+
+    if env::var_os("CARGO_CFG_WINDOWS").is_some() {
+        build = build
+            .define("HAVE_DIRENT_H", Some("0"))
+            .define("HAVE_UNISTD_H", Some("0"));
+    } else {
+        // extra parameters to use in non-Windows
+        println!("cargo:rustc-link-lib=m");
+
+        build = build
+            .flag("-O0")
+            .flag("-ggdb3")
+            .flag("-fdiagnostics-show-option")
+            .flag("-fno-exceptions")
+            .flag("-fno-omit-frame-pointer")
+            .flag("-fno-optimize-sibling-calls")
+            //.flag("-fsanitize=address")
+            //.flag("-fsanitize=undefined")
+            .flag("-fstack-protector")
+            .flag("-pedantic")
+            .define("HAVE_DIRENT_H", None)
+            .define("HAVE_UNISTD_H", None);
+    }
 
     build.compile("timelib");
 }
