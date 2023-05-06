@@ -137,7 +137,11 @@ mod tests {
     fn test_strtotime_valid_date_time_relative_base_timezone() {
         let today = 1654318823; // Saturday, June 4, 2022 12:00:23 AM GMT-05:00 DST
         let tomorrow = 1654405200; // Sunday, June 5, 2022 12:00:00 AM GMT-05:00 DST
-        let result = strtotime("tomorrow".into(), Some(today), Some("America/Chicago".into()));
+        let result = strtotime(
+            "tomorrow".into(),
+            Some(today),
+            Some("America/Chicago".into()),
+        );
         assert!(result.is_ok());
         assert_eq!(tomorrow, result.unwrap());
     }
