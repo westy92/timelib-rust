@@ -16,8 +16,16 @@ pub fn strtotime(
         return Err("Empty input string.".into());
     }
 
-    let tz_c_str = CString::new(timezone.unwrap_or("UTC".into())).unwrap();
-    let date_time_c_str = CString::new(date_time.to_owned()).unwrap();
+    let tz_c_str = CString::new(timezone.unwrap_or("UTC".into()));
+    if tz_c_str.is_err() {
+        return Err("Malformed timezone string.".into());
+    }
+    let tz_c_str = tz_c_str.unwrap();
+    let date_time_c_str = CString::new(date_time.to_owned());
+    if date_time_c_str.is_err() {
+        return Err("Malformed date_time string.".into());
+    }
+    let date_time_c_str = date_time_c_str.unwrap();
     let mut error_code: i32 = 0;
     let error_code_ptr = &mut error_code as *mut i32;
 
@@ -35,7 +43,7 @@ pub fn strtotime(
         let mut error = std::mem::MaybeUninit::uninit();
         let parsed_time = timelib_strtotime(
             date_time_c_str.as_ptr(),
-            date_time_c_str.to_bytes().len() as u64,
+            date_time_c_str.to_bytes().len() as size_t,
             error.as_mut_ptr(),
             timelib_builtin_db(),
             Some(cached_tzfile_wrapper),
@@ -92,10 +100,24 @@ mod tests {
     }
 
     #[test]
+    fn test_strtotime_invalid_timezone_string() {
+        let result = strtotime("today".into(), None, Some("UTC\0".into()));
+        assert!(result.is_err());
+        assert_eq!("Malformed timezone string.", result.unwrap_err());
+    }
+
+    #[test]
     fn test_strtotime_invalid_date_time() {
         let result = strtotime("derp".into(), None, None);
         assert!(result.is_err());
         assert_eq!("Invalid date_time string.", result.unwrap_err());
+    }
+
+    #[test]
+    fn test_strtotime_invalid_date_time_string() {
+        let result = strtotime("today\0".into(), None, None);
+        assert!(result.is_err());
+        assert_eq!("Malformed date_time string.", result.unwrap_err());
     }
 
     #[test]
