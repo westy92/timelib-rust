@@ -1,9 +1,21 @@
 use std::{
+    env,
     fs::File,
     process::{Command, Stdio},
 };
 
+use bindgen::builder;
+
 fn main() {
+    let bindings = builder()
+        .header("ext/timelib/timelib.h")
+        .generate()
+        .expect("failed to run bindgen");
+
+    bindings
+        .write_to_file("src/bindings.rs")
+        .expect("failed to write bindings.rs");
+
     // run re2c on 2 files
     re2c("parse_date");
     re2c("parse_iso_intervals");
@@ -31,7 +43,7 @@ fn main() {
         .define("HAVE_STDINT_H", None)
         .define("HAVE_GETTIMEOFDAY", None);
 
-    if std::env::var_os("CARGO_CFG_WINDOWS").is_some() {
+    if env::var_os("CARGO_CFG_WINDOWS").is_some() {
         build = build
             .define("HAVE_DIRENT_H", Some("0"))
             .define("HAVE_UNISTD_H", Some("0"));
