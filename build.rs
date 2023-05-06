@@ -31,10 +31,13 @@ fn main() {
         // taken from Makefile
         .flag("-Wall")
         .define("HAVE_STDINT_H", None)
-        .define("HAVE_GETTIMEOFDAY", None)
-        .define("HAVE_DIRENT_H", None);
+        .define("HAVE_GETTIMEOFDAY", None);
 
-    if !std::env::var_os("CARGO_CFG_WINDOWS").is_some() {
+    if std::env::var_os("CARGO_CFG_WINDOWS").is_some() {
+        build = build
+            .define("HAVE_DIRENT_H", Some("0"))
+            .define("HAVE_UNISTD_H", Some("0"));
+    } else {
         // extra parameters to use in non-Windows
         build = build
             .flag("-O0")
@@ -47,6 +50,7 @@ fn main() {
             //.flag("-fsanitize=undefined")
             .flag("-fstack-protector")
             .flag("-pedantic")
+            .define("HAVE_DIRENT_H", None)
             .define("HAVE_UNISTD_H", None);
     }
 
