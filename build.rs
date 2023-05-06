@@ -9,6 +9,19 @@ use bindgen::builder;
 fn main() {
     let bindings = builder()
         .header("ext/timelib/timelib.h")
+        .allowlist_var("TIMELIB_ZONETYPE_ID")
+        .allowlist_var("TIMELIB_NO_CLONE")
+        .allowlist_function("timelib_builtin_db")
+        .allowlist_function("timelib_date_to_int")
+        .allowlist_function("timelib_error_container_dtor")
+        .allowlist_function("timelib_fill_holes")
+        .allowlist_function("timelib_parse_tzfile")
+        .allowlist_function("timelib_strtotime")
+        .allowlist_function("timelib_time_ctor")
+        .allowlist_function("timelib_time_dtor")
+        .allowlist_function("timelib_tzinfo_dtor")
+        .allowlist_function("timelib_unixtime2local")
+        .allowlist_function("timelib_update_ts")
         .generate()
         .expect("failed to run bindgen");
 
