@@ -1,6 +1,9 @@
 mod internal;
 
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::{
+    ffi::CString,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 use internal::*;
 
@@ -13,18 +16,15 @@ pub fn strtotime(
         return Err("Empty input string.".into());
     }
 
-    let tz = timezone.unwrap_or("UTC".into());
+    let tz_c_str = CString::new(timezone.unwrap_or("UTC".into())).unwrap();
+    let date_time_c_str = CString::new(date_time.to_owned()).unwrap();
     let mut error_code: i32 = 0;
     let error_code_ptr = &mut error_code as *mut i32;
 
     unsafe {
-        let tzi = timelib_parse_tzfile(
-            tz.as_ptr() as *const i8,
-            timelib_builtin_db(),
-            error_code_ptr,
-        );
+        let tzi = timelib_parse_tzfile(tz_c_str.as_ptr(), timelib_builtin_db(), error_code_ptr);
         if tzi.is_null() {
-            return Err("Invalid timezone.".into());
+            return Err(format!("Invalid timezone. Err: {error_code}."));
         }
 
         let base = timelib_time_ctor();
@@ -34,8 +34,8 @@ pub fn strtotime(
 
         let mut error = std::mem::MaybeUninit::uninit();
         let parsed_time = timelib_strtotime(
-            date_time.as_ptr() as *const i8,
-            date_time.len().try_into().unwrap(),
+            date_time_c_str.as_ptr(),
+            date_time_c_str.to_bytes().len() as u64,
             error.as_mut_ptr(),
             timelib_builtin_db(),
             Some(cached_tzfile_wrapper),
@@ -88,15 +88,61 @@ mod tests {
     fn test_strtotime_invalid_timezone() {
         let result = strtotime("today".into(), None, Some("pizza".into()));
         assert!(result.is_err());
-        assert_eq!("Invalid timezone.", result.unwrap_err());
+        assert_eq!("Invalid timezone. Err: 6.", result.unwrap_err());
     }
 
-    /*#[test]
+    #[test]
     fn test_strtotime_invalid_date_time() {
         let result = strtotime("derp".into(), None, None);
         assert!(result.is_err());
         assert_eq!("Invalid date_time string.", result.unwrap_err());
-    }*/
+    }
 
-    // TODO more tests
+    #[test]
+    fn test_strtotime_valid_date_time_fixed() {
+        let result = strtotime("jun 4 2022".into(), None, None);
+        assert!(result.is_ok());
+        assert_eq!(1654300800, result.unwrap());
+    }
+
+    #[test]
+    fn test_strtotime_valid_date_time_fixed_timezone() {
+        let result = strtotime("jun 4 2022".into(), None, Some("America/Chicago".into()));
+        assert!(result.is_ok());
+        assert_eq!(1654318800, result.unwrap());
+    }
+
+    const SEC_PER_DAY: i64 = 86_400;
+
+    #[test]
+    fn test_strtotime_valid_date_time_relative() {
+        let result = strtotime("tomorrow".into(), None, None);
+        assert!(result.is_ok());
+        let result = result.unwrap();
+        let now = rust_now_sec();
+        assert!(now <= result);
+        assert!(now + SEC_PER_DAY >= result);
+    }
+
+    #[test]
+    fn test_strtotime_valid_date_time_relative_base() {
+        let today = 1654318823; // Saturday, June 4, 2022 5:00:23 AM GMT
+        let tomorrow = 1654387200; // Sunday, June 5, 2022 12:00:00 AM GMT
+        let result = strtotime("tomorrow".into(), Some(today), None);
+        assert!(result.is_ok());
+        assert_eq!(tomorrow, result.unwrap());
+    }
+
+    #[test]
+    fn test_strtotime_valid_date_time_relative_base_timezone() {
+        let today = 1654318823; // Saturday, June 4, 2022 12:00:23 AM GMT-05:00 DST
+        let tomorrow = 1654405200; // Sunday, June 5, 2022 12:00:00 AM GMT-05:00 DST
+        let result = strtotime(
+            "tomorrow".into(),
+            Some(today),
+            Some("America/Chicago".into()),
+        );
+        assert!(result.is_ok());
+        assert_eq!(tomorrow, result.unwrap());
+    }
 }
