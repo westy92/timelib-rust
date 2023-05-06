@@ -13,7 +13,7 @@ pub fn strtotime(
     timezone: Option<String>,
 ) -> Result<i64, String> {
     if date_time.is_empty() {
-        return Err("Empty input string.".into());
+        return Err("Empty date_time string.".into());
     }
 
     let tz_c_str = CString::new(timezone.unwrap_or("UTC".into()));
@@ -43,7 +43,7 @@ pub fn strtotime(
         let mut error = std::mem::MaybeUninit::uninit();
         let parsed_time = timelib_strtotime(
             date_time_c_str.as_ptr(),
-            date_time_c_str.to_bytes().len() as size_t,
+            date_time_c_str.to_bytes().len().try_into().unwrap(),
             error.as_mut_ptr(),
             timelib_builtin_db(),
             Some(cached_tzfile_wrapper),
@@ -89,7 +89,7 @@ mod tests {
     fn test_strtotime_empty_input() {
         let result = strtotime("".into(), None, None);
         assert!(result.is_err());
-        assert_eq!("Empty input string.", result.unwrap_err());
+        assert_eq!("Empty date_time string.", result.unwrap_err());
     }
 
     #[test]
