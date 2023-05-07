@@ -2,6 +2,21 @@
 name = "timelib"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "A small Rust wrapper around the timelib library."
+documentation = "https://docs.rs/timelib"
+homepage = "https://github.com/westy92/timelib-rust"
+repository = "https://github.com/westy92/timelib-rust.git"
+readme = "README.md"
+categories = ["date-and-time", "api-bindings", "external-ffi-bindings", "internationalization", "localization"]
+keywords = ["strtotime", "php", "timelib", "date", "datetime"]
+authors = ["Seth Westphal", "Westy92 LLC"]
+include = [
+    "/build.rs",
+    "/src/**/*.rs",
+    "/ext/**",
+    "Cargo.toml",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
