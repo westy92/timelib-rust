@@ -1,6 +1,7 @@
 use std::{
     env,
     fs::File,
+    path::PathBuf,
     process::{Command, Stdio},
 };
 
@@ -25,26 +26,29 @@ fn main() {
         .generate()
         .expect("failed to run bindgen");
 
+    let out_dir = env::var("OUT_DIR").unwrap();
+    let out_path = PathBuf::from(out_dir.clone());
     bindings
-        .write_to_file("src/bindings.rs")
+        .write_to_file(out_path.join("bindings.rs"))
         .expect("failed to write bindings.rs");
 
     // run re2c on 2 files
-    re2c("parse_date");
-    re2c("parse_iso_intervals");
+    re2c("parse_date", &out_path);
+    re2c("parse_iso_intervals", &out_path);
 
     let src = [
         "ext/timelib/astro.c",
         "ext/timelib/dow.c",
         "ext/timelib/interval.c",
-        "ext/timelib/parse_date.c",
-        "ext/timelib/parse_iso_intervals.c",
         "ext/timelib/parse_posix.c",
         "ext/timelib/parse_tz.c",
         "ext/timelib/parse_zoneinfo.c",
         "ext/timelib/timelib.c",
         "ext/timelib/tm2unixtime.c",
         "ext/timelib/unixtime2tm.c",
+        // files generated from re2c:
+        &format!("{}/parse_date.c", out_dir.clone()),
+        &format!("{}/parse_iso_intervals.c", out_dir.clone()),
     ];
 
     let mut builder = cc::Build::new();
@@ -82,8 +86,8 @@ fn main() {
     build.compile("timelib");
 }
 
-fn re2c(file: &str) {
-    let target_file = File::create(format!("ext/timelib/{file}.c")).unwrap();
+fn re2c(file: &str, out_path: &PathBuf) {
+    let target_file = File::create(out_path.join(format!("{file}.c"))).unwrap();
     let stdio = Stdio::from(target_file);
     let mut cmd = Command::new("re2c")
         .current_dir("ext/timelib")
