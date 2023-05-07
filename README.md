@@ -28,9 +28,8 @@ cargo add timelib
 ## Usage
 
 ```rust
-strtotime("tomorrow".into(), None, None);
-
-strtotime("next tuesday".into(), Some(1654318823), Some("America/Chicago".into()));
+timelib::strtotime("tomorrow".into(), None, None);
+timelib::strtotime("next tuesday".into(), Some(1654318823), Some("America/Chicago".into()));
 ```
 
 View the tests for more examples.
@@ -54,3 +53,9 @@ git submodule init && git submodule update
 Make sure to install `re2c` as described above.
 
 You should now be able to run `cargo build` and `cargo test`.
+
+## Publishing
+
+```bash
+cargo publish --allow-dirty --no-verify 
+```

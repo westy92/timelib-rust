@@ -7,6 +7,20 @@ use std::{
 
 use internal::*;
 
+/// Returns a timestamp (in seconds since the epoch) or an error (string).
+///
+/// # Arguments
+///
+/// * `date_time` - A string that holds the relative date you wish to compute.
+/// * `base_timestamp` - An optional timestamp (in seconds) to use as your base (defaults to the current timestamp).
+/// * `timezone` - A string that holds the timestamp you'd like to use. Defaults to UTC.
+///
+/// # Examples
+///
+/// ```
+/// timelib::strtotime("tomorrow".into(), None, None);
+/// timelib::strtotime("next tuesday".into(), Some(1654318823), Some("America/Chicago".into()));
+/// ```
 pub fn strtotime(
     date_time: String,
     base_timestamp: Option<i64>,
