@@ -40,7 +40,7 @@ Make sure to check out all submodules.
 
 Initial clone:
 
-```bash 
+```bash
 git clone --recurse-submodules https://github.com/westy92/timelib-rust
 ```
 
