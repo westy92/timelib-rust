@@ -71,7 +71,7 @@ pub fn strtotime(
         }
         timelib_fill_holes(parsed_time, base, TIMELIB_NO_CLONE as i32);
         timelib_update_ts(parsed_time, tzi);
-        let result = timelib_date_to_int(parsed_time, error_code_ptr);
+        let result = (*parsed_time).sse;
         timelib_time_dtor(parsed_time);
         timelib_time_dtor(base);
         timelib_tzinfo_dtor(tzi);
