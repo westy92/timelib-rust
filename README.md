@@ -31,10 +31,10 @@ View the tests for more examples.
 The genereated `re2c` outputs are bundled and automatically used. If you wish to generate these files yourself, do the following:
 
 1. Install `re2c`. You can install it easily on all major platforms:
-    1. Linux: `apt-get install re2c`
-    1. Mac: `brew install re2c`
-    1. Windows: `choco install re2c`
-    1. From source: [re2c.org](https://re2c.org/)
+    - Linux: `apt-get install re2c`
+    - Mac: `brew install re2c`
+    - Windows: `choco install re2c`
+    - From source: [re2c.org](https://re2c.org/)
 1. Enable the `re2c` feature:
     - `timelib = { version = "0.2.0", features = ["re2c"] }`
 
