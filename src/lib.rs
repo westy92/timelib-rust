@@ -18,7 +18,7 @@ use internal::*;
 /// # Examples
 ///
 /// ```
-/// let tz = timelib::Timezone::parse("America/Chicago".into()).unwrap();
+/// let tz = timelib::Timezone::parse("America/Chicago".into()).expect("Error parsing timezone!");
 /// timelib::strtotime("tomorrow".into(), None, &tz);
 /// timelib::strtotime("next tuesday".into(), Some(1654318823), &tz);
 /// ```
