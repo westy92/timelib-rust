@@ -54,8 +54,16 @@ Make sure to install `re2c` as described above.
 
 You should now be able to run `cargo build` and `cargo test`.
 
-## Publishing
+## Updating the submodule version
 
 ```bash
-cargo publish --allow-dirty --no-verify 
+git submodule update --remote
+```
+
+## Publishing
+
+Remove `--dry-run` to publish for real.
+
+```bash
+cargo publish --dry-run
 ```

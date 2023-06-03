@@ -13,7 +13,6 @@ fn main() {
         .allowlist_var("TIMELIB_ZONETYPE_ID")
         .allowlist_var("TIMELIB_NO_CLONE")
         .allowlist_function("timelib_builtin_db")
-        .allowlist_function("timelib_date_to_int")
         .allowlist_function("timelib_error_container_dtor")
         .allowlist_function("timelib_fill_holes")
         .allowlist_function("timelib_parse_tzfile")
