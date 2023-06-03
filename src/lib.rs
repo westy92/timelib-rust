@@ -99,7 +99,7 @@ impl Drop for Timezone {
 
 impl Timezone {
     /// Parses a String into a Timezone instance.
-    /// 
+    ///
     /// # Arguments
     ///
     /// * `timezone` - A String with your IANA Timezone name.
@@ -123,9 +123,7 @@ impl Timezone {
             if tzi.is_null() {
                 return Err(format!("Invalid timezone. Err: {error_code}."));
             }
-            Ok(Self {
-                tzi,
-            })
+            Ok(Self { tzi })
         }
     }
 }
@@ -202,11 +200,7 @@ mod tests {
         let tz = Timezone::parse("America/Chicago".into()).unwrap();
         let today = 1654318823; // Saturday, June 4, 2022 12:00:23 AM GMT-05:00 DST
         let tomorrow = 1654405200; // Sunday, June 5, 2022 12:00:00 AM GMT-05:00 DST
-        let result = strtotime(
-            "tomorrow".into(),
-            Some(today),
-            &tz,
-        );
+        let result = strtotime("tomorrow".into(), Some(today), &tz);
         assert!(result.is_ok());
         assert_eq!(tomorrow, result.unwrap());
     }
