@@ -10,16 +10,7 @@ Timelib for Rust is a small Rust wrapper around the [timelib](https://github.com
 
 ## Installation
 
-Prerequisites:
-
-`timelib` depends on `re2c` to be built. You can install it easily on all major platforms:
-
-1. Linux: `apt-get install re2c`
-1. Mac: `brew install re2c`
-1. Windows: `choco install re2c`
-1. From source: [re2c.org](https://re2c.org/)
-
-Now you can install with:
+You can install with:
 
 ```bash
 cargo add timelib
@@ -34,6 +25,18 @@ timelib::strtotime("next tuesday".into(), Some(1654318823), &tz);
 ```
 
 View the tests for more examples.
+
+## Optional Features
+
+The genereated `re2c` outputs are bundled and automatically used. If you wish to generate these files yourself, do the following:
+
+1. Install `re2c`. You can install it easily on all major platforms:
+    1. Linux: `apt-get install re2c`
+    1. Mac: `brew install re2c`
+    1. Windows: `choco install re2c`
+    1. From source: [re2c.org](https://re2c.org/)
+1. Enable the `re2c` feature:
+    - `timelib = { version = "0.2.0", features = ["re2c"] }`
 
 ## Building
 
@@ -51,15 +54,25 @@ Post-clone:
 git submodule init && git submodule update
 ```
 
-Make sure to install `re2c` as described above.
-
 You should now be able to run `cargo build` and `cargo test`.
+
+If using the `re2c` feature, make sure to install `re2c` as described above. i.e. `cargo test --features re2c`.
+
 
 ## Updating the submodule version
 
 ```bash
 git submodule update --remote
 ```
+
+Make sure to regenerate the re2c outputs:
+
+```bash
+cd ext/timelib/
+make parse_date.c parse_iso_intervals.c
+```
+
+Copy them to `pregenerated/`.
 
 ## Publishing
 

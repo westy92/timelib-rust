@@ -15,6 +15,7 @@ include = [
     "/build.rs",
     "/src/**/*.rs",
     "/ext/**",
+    "/pregenerated/**",
     "Cargo.toml",
 ]
 
@@ -25,3 +26,6 @@ include = [
 [build-dependencies]
 bindgen = "0"
 cc = { version = "1.0", features = ["parallel"] }
+
+[features]
+re2c = []
