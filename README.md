@@ -58,7 +58,6 @@ You should now be able to run `cargo build` and `cargo test`.
 
 If using the `re2c` feature, make sure to install `re2c` as described above. i.e. `cargo test --features re2c`.
 
-
 ## Updating the submodule version
 
 ```bash
