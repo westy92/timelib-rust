@@ -62,6 +62,8 @@ git submodule update --remote
 
 ## Publishing
 
+Remove `--dry-run` to publish for real.
+
 ```bash
-cargo publish --allow-dirty --no-verify
+cargo publish --dry-run
 ```
