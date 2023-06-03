@@ -49,6 +49,9 @@ jobs:
       if: ${{ matrix.os != 'ubuntu-latest' }}
       run: cargo test
 
+    - name: Build and Test (With re2c)
+      run: cargo test --features re2c
+
     - name: Upload coverage to Codecov
       if: ${{ matrix.os == 'ubuntu-latest' }}
       uses: codecov/codecov-action@v3

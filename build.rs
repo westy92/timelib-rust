@@ -1,7 +1,8 @@
+use std::{env, path::PathBuf};
+
+#[cfg(feature = "re2c")]
 use std::{
-    env,
     fs::File,
-    path::PathBuf,
     process::{Command, Stdio},
 };
 
@@ -32,7 +33,9 @@ fn main() {
         .expect("failed to write bindings.rs");
 
     // run re2c on 2 files
+    #[cfg(feature = "re2c")]
     re2c("parse_date", &out_path);
+    #[cfg(feature = "re2c")]
     re2c("parse_iso_intervals", &out_path);
 
     let src = [
@@ -46,8 +49,14 @@ fn main() {
         "ext/timelib/tm2unixtime.c",
         "ext/timelib/unixtime2tm.c",
         // files generated from re2c:
+        #[cfg(feature = "re2c")]
         &format!("{}/parse_date.c", out_dir.clone()),
+        #[cfg(feature = "re2c")]
         &format!("{}/parse_iso_intervals.c", out_dir.clone()),
+        #[cfg(not(feature = "re2c"))]
+        "pregenerated/parse_date.c",
+        #[cfg(not(feature = "re2c"))]
+        "pregenerated/parse_iso_intervals.c",
     ];
 
     let mut builder = cc::Build::new();
@@ -85,6 +94,7 @@ fn main() {
     build.compile("timelib");
 }
 
+#[cfg(feature = "re2c")]
 fn re2c(file: &str, out_path: &PathBuf) {
     let target_file = File::create(out_path.join(format!("{file}.c"))).unwrap();
     let stdio = Stdio::from(target_file);
