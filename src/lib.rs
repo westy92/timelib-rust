@@ -1,7 +1,7 @@
 mod internal;
 
 use std::{
-    ffi::CString,
+    ffi::{CStr, CString},
     time::{SystemTime, UNIX_EPOCH},
 };
 
@@ -50,6 +50,7 @@ pub fn strtotime(
         timelib_error_container_dtor(error.assume_init());
         if err_count != 0 {
             timelib_time_dtor(parsed_time);
+            // TODO expose error message(s)
             return Err("Invalid date_time string.".into());
         }
 
@@ -126,6 +127,12 @@ impl Timezone {
             Ok(Self { tzi })
         }
     }
+
+    /// Returns the underlying timezone database version.
+    pub fn db_version() -> String {
+        let cstr = unsafe { CStr::from_ptr((*timelib_builtin_db()).version) };
+        String::from_utf8_lossy(cstr.to_bytes()).to_string()
+    }
 }
 
 #[cfg(test)]
@@ -133,7 +140,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_strtotime_empty_input() {
+    fn strtotime_empty_input() {
         let tz = Timezone::parse("UTC".into()).unwrap();
         let result = strtotime("".into(), None, &tz);
         assert!(result.is_err());
@@ -141,7 +148,7 @@ mod tests {
     }
 
     #[test]
-    fn test_strtotime_invalid_date_time() {
+    fn strtotime_invalid_date_time() {
         let tz = Timezone::parse("UTC".into()).unwrap();
         let result = strtotime("derp".into(), None, &tz);
         assert!(result.is_err());
@@ -149,7 +156,7 @@ mod tests {
     }
 
     #[test]
-    fn test_strtotime_invalid_date_time_string() {
+    fn strtotime_invalid_date_time_string() {
         let tz = Timezone::parse("UTC".into()).unwrap();
         let result = strtotime("today\0".into(), None, &tz);
         assert!(result.is_err());
@@ -157,7 +164,7 @@ mod tests {
     }
 
     #[test]
-    fn test_strtotime_valid_date_time_fixed() {
+    fn strtotime_valid_date_time_fixed() {
         let tz = Timezone::parse("UTC".into()).unwrap();
         let result = strtotime("jun 4 2022".into(), None, &tz);
         assert!(result.is_ok());
@@ -165,7 +172,7 @@ mod tests {
     }
 
     #[test]
-    fn test_strtotime_valid_date_time_fixed_timezone() {
+    fn strtotime_valid_date_time_fixed_timezone() {
         let tz = Timezone::parse("America/Chicago".into()).unwrap();
         let result = strtotime("jun 4 2022".into(), None, &tz);
         assert!(result.is_ok());
@@ -175,7 +182,7 @@ mod tests {
     const SEC_PER_DAY: i64 = 86_400;
 
     #[test]
-    fn test_strtotime_valid_date_time_relative() {
+    fn strtotime_valid_date_time_relative() {
         let tz = Timezone::parse("UTC".into()).unwrap();
         let result = strtotime("tomorrow".into(), None, &tz);
         assert!(result.is_ok());
@@ -186,7 +193,7 @@ mod tests {
     }
 
     #[test]
-    fn test_strtotime_valid_date_time_relative_base() {
+    fn strtotime_valid_date_time_relative_base() {
         let tz = Timezone::parse("UTC".into()).unwrap();
         let today = 1654318823; // Saturday, June 4, 2022 5:00:23 AM GMT
         let tomorrow = 1654387200; // Sunday, June 5, 2022 12:00:00 AM GMT
@@ -196,7 +203,7 @@ mod tests {
     }
 
     #[test]
-    fn test_strtotime_valid_date_time_relative_base_timezone() {
+    fn strtotime_valid_date_time_relative_base_timezone() {
         let tz = Timezone::parse("America/Chicago".into()).unwrap();
         let today = 1654318823; // Saturday, June 4, 2022 12:00:23 AM GMT-05:00 DST
         let tomorrow = 1654405200; // Sunday, June 5, 2022 12:00:00 AM GMT-05:00 DST
@@ -206,22 +213,27 @@ mod tests {
     }
 
     #[test]
-    fn test_timezone_invalid_timezone() {
+    fn timezone_invalid_timezone() {
         let result = Timezone::parse("pizza".into());
         assert!(result.is_err());
         assert_eq!("Invalid timezone. Err: 6.", result.unwrap_err());
     }
 
     #[test]
-    fn test_timezone_invalid_timezone_string() {
+    fn timezone_invalid_timezone_string() {
         let result = Timezone::parse("UTC\0".into());
         assert!(result.is_err());
         assert_eq!("Malformed timezone string.", result.unwrap_err());
     }
 
     #[test]
-    fn test_timezone_valid_timezone() {
+    fn timezone_valid_timezone() {
         let result = Timezone::parse("America/Chicago".into());
         assert!(result.is_ok());
+    }
+
+    #[test]
+    fn timezone_db_version() {
+        assert_eq!("2023.3", Timezone::db_version());
     }
 }
