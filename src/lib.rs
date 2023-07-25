@@ -41,7 +41,7 @@ pub fn strtotime(
         let mut error = std::mem::MaybeUninit::uninit();
         let parsed_time = timelib_strtotime(
             date_time_c_str.as_ptr(),
-            date_time_c_str.to_bytes().len().try_into().unwrap(),
+            date_time_c_str.to_bytes().len(),
             error.as_mut_ptr(),
             timelib_builtin_db(),
             Some(cached_tzfile_wrapper),
@@ -57,7 +57,7 @@ pub fn strtotime(
         let base = timelib_time_ctor();
         (*base).tz_info = timezone.tzi;
         (*base).zone_type = TIMELIB_ZONETYPE_ID;
-        timelib_unixtime2local(base, base_timestamp.unwrap_or_else(|| rust_now_sec()));
+        timelib_unixtime2local(base, base_timestamp.unwrap_or_else(rust_now_sec));
 
         timelib_fill_holes(parsed_time, base, TIMELIB_NO_CLONE as i32);
         timelib_update_ts(parsed_time, timezone.tzi);
@@ -65,7 +65,7 @@ pub fn strtotime(
         timelib_time_dtor(parsed_time);
         timelib_time_dtor(base);
 
-        return Ok(result);
+        Ok(result)
     }
 }
 
@@ -74,14 +74,14 @@ unsafe extern "C" fn cached_tzfile_wrapper(
     db: *const timelib_tzdb,
     error: *mut i32,
 ) -> *mut timelib_tzinfo {
-    return timelib_parse_tzfile(tz_id, db, error);
+    timelib_parse_tzfile(tz_id, db, error)
 }
 
 fn rust_now_sec() -> i64 {
-    return SystemTime::now()
+    SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
-        .as_secs() as i64;
+        .as_secs() as i64
 }
 
 /// A Timezone wrapper.
