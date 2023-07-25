@@ -43,7 +43,7 @@ jobs:
 
     - name: Build and Test (Coverage)
       if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: cargo llvm-cov nextest --out Xml
+      run: cargo llvm-cov nextest --lcov --output-path lcov.info
 
     - name: Build and Test (No Coverage)
       if: ${{ matrix.os != 'ubuntu-latest' }}
@@ -55,3 +55,5 @@ jobs:
     - name: Upload coverage to Codecov
       if: ${{ matrix.os == 'ubuntu-latest' }}
       uses: codecov/codecov-action@v3
+      with:
+        files: lcov.info
