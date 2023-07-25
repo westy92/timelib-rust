@@ -37,13 +37,13 @@ jobs:
       if: ${{ matrix.os == 'windows-latest' }}
       run: choco install re2c
 
-    - name: Install tarpaulin
+    - name: Install Coverage Tools
       if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: cargo install cargo-tarpaulin
+      run: cargo install cargo-llvm-cov
 
     - name: Build and Test (Coverage)
       if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: cargo tarpaulin --out Xml
+      run: cargo llvm-cov nextest --out Xml
 
     - name: Build and Test (No Coverage)
       if: ${{ matrix.os != 'ubuntu-latest' }}
