@@ -18,12 +18,12 @@ use internal::*;
 /// # Examples
 ///
 /// ```
-/// let tz = timelib::Timezone::parse("America/Chicago".into()).expect("Error parsing timezone!");
-/// timelib::strtotime("tomorrow".into(), None, &tz);
-/// timelib::strtotime("next tuesday".into(), Some(1654318823), &tz);
+/// let tz = timelib::Timezone::parse("America/Chicago").expect("Error parsing timezone!");
+/// timelib::strtotime("tomorrow", None, &tz);
+/// timelib::strtotime("next tuesday", Some(1654318823), &tz);
 /// ```
 pub fn strtotime(
-    date_time: String,
+    date_time: &str,
     base_timestamp: Option<i64>,
     timezone: &Timezone,
 ) -> Result<i64, String> {
@@ -31,7 +31,7 @@ pub fn strtotime(
         return Err("Empty date_time string.".into());
     }
 
-    let Ok(date_time_c_str) = CString::new(date_time.to_owned()) else {
+    let Ok(date_time_c_str) = CString::new(date_time) else {
         return Err("Malformed date_time string.".into());
     };
 
@@ -106,10 +106,10 @@ impl Timezone {
     /// # Examples
     ///
     /// ```
-    /// let tz = timelib::Timezone::parse("UTC".into());
-    /// let tz = timelib::Timezone::parse("America/Chicago".into());
+    /// let tz = timelib::Timezone::parse("UTC");
+    /// let tz = timelib::Timezone::parse("America/Chicago");
     /// ```
-    pub fn parse(timezone: String) -> Result<Timezone, String> {
+    pub fn parse(timezone: &str) -> Result<Timezone, String> {
         let Ok(tz_c_str) = CString::new(timezone) else {
             return Err("Malformed timezone string.".into());
         };
@@ -137,36 +137,36 @@ mod tests {
 
     #[test]
     fn strtotime_empty_input() {
-        let tz = Timezone::parse("UTC".into()).unwrap();
-        let result = strtotime("".into(), None, &tz);
+        let tz = Timezone::parse("UTC").unwrap();
+        let result = strtotime("", None, &tz);
         assert_eq!(Err("Empty date_time string.".to_string()), result);
     }
 
     #[test]
     fn strtotime_invalid_date_time() {
-        let tz = Timezone::parse("UTC".into()).unwrap();
-        let result = strtotime("derp".into(), None, &tz);
+        let tz = Timezone::parse("UTC").unwrap();
+        let result = strtotime("derp", None, &tz);
         assert_eq!(Err("Invalid date_time string.".to_string()), result);
     }
 
     #[test]
     fn strtotime_invalid_date_time_string() {
-        let tz = Timezone::parse("UTC".into()).unwrap();
-        let result = strtotime("today\0".into(), None, &tz);
+        let tz = Timezone::parse("UTC").unwrap();
+        let result = strtotime("today\0", None, &tz);
         assert_eq!(Err("Malformed date_time string.".to_string()), result);
     }
 
     #[test]
     fn strtotime_valid_date_time_fixed() {
-        let tz = Timezone::parse("UTC".into()).unwrap();
-        let result = strtotime("jun 4 2022".into(), None, &tz);
+        let tz = Timezone::parse("UTC").unwrap();
+        let result = strtotime("jun 4 2022", None, &tz);
         assert_eq!(Ok(1654300800), result);
     }
 
     #[test]
     fn strtotime_valid_date_time_fixed_timezone() {
-        let tz = Timezone::parse("America/Chicago".into()).unwrap();
-        let result = strtotime("jun 4 2022".into(), None, &tz);
+        let tz = Timezone::parse("America/Chicago").unwrap();
+        let result = strtotime("jun 4 2022", None, &tz);
         assert_eq!(Ok(1654318800), result);
     }
 
@@ -174,8 +174,8 @@ mod tests {
 
     #[test]
     fn strtotime_valid_date_time_relative() {
-        let tz = Timezone::parse("UTC".into()).unwrap();
-        let result = strtotime("tomorrow".into(), None, &tz);
+        let tz = Timezone::parse("UTC").unwrap();
+        let result = strtotime("tomorrow", None, &tz);
         assert!(result.is_ok());
         let result = result.unwrap();
         let now = rust_now_sec();
@@ -185,37 +185,37 @@ mod tests {
 
     #[test]
     fn strtotime_valid_date_time_relative_base() {
-        let tz = Timezone::parse("UTC".into()).unwrap();
+        let tz = Timezone::parse("UTC").unwrap();
         let today = 1654318823; // Saturday, June 4, 2022 5:00:23 AM GMT
         let tomorrow = 1654387200; // Sunday, June 5, 2022 12:00:00 AM GMT
-        let result = strtotime("tomorrow".into(), Some(today), &tz);
+        let result = strtotime("tomorrow", Some(today), &tz);
         assert_eq!(Ok(tomorrow), result);
     }
 
     #[test]
     fn strtotime_valid_date_time_relative_base_timezone() {
-        let tz = Timezone::parse("America/Chicago".into()).unwrap();
+        let tz = Timezone::parse("America/Chicago").unwrap();
         let today = 1654318823; // Saturday, June 4, 2022 12:00:23 AM GMT-05:00 DST
         let tomorrow = 1654405200; // Sunday, June 5, 2022 12:00:00 AM GMT-05:00 DST
-        let result = strtotime("tomorrow".into(), Some(today), &tz);
+        let result = strtotime("tomorrow", Some(today), &tz);
         assert_eq!(Ok(tomorrow), result);
     }
 
     #[test]
     fn timezone_invalid_timezone() {
-        let result = Timezone::parse("pizza".into());
+        let result = Timezone::parse("pizza");
         assert_eq!(Err("Invalid timezone. Err: 6.".to_string()), result);
     }
 
     #[test]
     fn timezone_invalid_timezone_string() {
-        let result = Timezone::parse("UTC\0".into());
+        let result = Timezone::parse("UTC\0");
         assert_eq!(Err("Malformed timezone string.".to_string()), result);
     }
 
     #[test]
     fn timezone_valid_timezone() {
-        let result = Timezone::parse("America/Chicago".into());
+        let result = Timezone::parse("America/Chicago");
         assert!(result.is_ok());
     }
 
