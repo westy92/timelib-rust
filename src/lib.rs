@@ -31,11 +31,9 @@ pub fn strtotime(
         return Err("Empty date_time string.".into());
     }
 
-    let date_time_c_str = CString::new(date_time.to_owned());
-    if date_time_c_str.is_err() {
+    let Ok(date_time_c_str) = CString::new(date_time.to_owned()) else {
         return Err("Malformed date_time string.".into());
-    }
-    let date_time_c_str = date_time_c_str.unwrap();
+    };
 
     unsafe {
         let mut error = std::mem::MaybeUninit::uninit();
@@ -85,7 +83,7 @@ fn rust_now_sec() -> i64 {
 }
 
 /// A Timezone wrapper.
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Timezone {
     tzi: *mut timelib_tzinfo,
 }
@@ -112,11 +110,9 @@ impl Timezone {
     /// let tz = timelib::Timezone::parse("America/Chicago".into());
     /// ```
     pub fn parse(timezone: String) -> Result<Timezone, String> {
-        let tz_c_str = CString::new(timezone);
-        if tz_c_str.is_err() {
+        let Ok(tz_c_str) = CString::new(timezone) else {
             return Err("Malformed timezone string.".into());
-        }
-        let tz_c_str = tz_c_str.unwrap();
+        };
         let mut error_code: i32 = 0;
         let error_code_ptr = &mut error_code as *mut i32;
         unsafe {
@@ -143,40 +139,35 @@ mod tests {
     fn strtotime_empty_input() {
         let tz = Timezone::parse("UTC".into()).unwrap();
         let result = strtotime("".into(), None, &tz);
-        assert!(result.is_err());
-        assert_eq!("Empty date_time string.", result.unwrap_err());
+        assert_eq!(Err("Empty date_time string.".to_string()), result);
     }
 
     #[test]
     fn strtotime_invalid_date_time() {
         let tz = Timezone::parse("UTC".into()).unwrap();
         let result = strtotime("derp".into(), None, &tz);
-        assert!(result.is_err());
-        assert_eq!("Invalid date_time string.", result.unwrap_err());
+        assert_eq!(Err("Invalid date_time string.".to_string()), result);
     }
 
     #[test]
     fn strtotime_invalid_date_time_string() {
         let tz = Timezone::parse("UTC".into()).unwrap();
         let result = strtotime("today\0".into(), None, &tz);
-        assert!(result.is_err());
-        assert_eq!("Malformed date_time string.", result.unwrap_err());
+        assert_eq!(Err("Malformed date_time string.".to_string()), result);
     }
 
     #[test]
     fn strtotime_valid_date_time_fixed() {
         let tz = Timezone::parse("UTC".into()).unwrap();
         let result = strtotime("jun 4 2022".into(), None, &tz);
-        assert!(result.is_ok());
-        assert_eq!(1654300800, result.unwrap());
+        assert_eq!(Ok(1654300800), result);
     }
 
     #[test]
     fn strtotime_valid_date_time_fixed_timezone() {
         let tz = Timezone::parse("America/Chicago".into()).unwrap();
         let result = strtotime("jun 4 2022".into(), None, &tz);
-        assert!(result.is_ok());
-        assert_eq!(1654318800, result.unwrap());
+        assert_eq!(Ok(1654318800), result);
     }
 
     const SEC_PER_DAY: i64 = 86_400;
@@ -198,8 +189,7 @@ mod tests {
         let today = 1654318823; // Saturday, June 4, 2022 5:00:23 AM GMT
         let tomorrow = 1654387200; // Sunday, June 5, 2022 12:00:00 AM GMT
         let result = strtotime("tomorrow".into(), Some(today), &tz);
-        assert!(result.is_ok());
-        assert_eq!(tomorrow, result.unwrap());
+        assert_eq!(Ok(tomorrow), result);
     }
 
     #[test]
@@ -208,22 +198,19 @@ mod tests {
         let today = 1654318823; // Saturday, June 4, 2022 12:00:23 AM GMT-05:00 DST
         let tomorrow = 1654405200; // Sunday, June 5, 2022 12:00:00 AM GMT-05:00 DST
         let result = strtotime("tomorrow".into(), Some(today), &tz);
-        assert!(result.is_ok());
-        assert_eq!(tomorrow, result.unwrap());
+        assert_eq!(Ok(tomorrow), result);
     }
 
     #[test]
     fn timezone_invalid_timezone() {
         let result = Timezone::parse("pizza".into());
-        assert!(result.is_err());
-        assert_eq!("Invalid timezone. Err: 6.", result.unwrap_err());
+        assert_eq!(Err("Invalid timezone. Err: 6.".to_string()), result);
     }
 
     #[test]
     fn timezone_invalid_timezone_string() {
         let result = Timezone::parse("UTC\0".into());
-        assert!(result.is_err());
-        assert_eq!("Malformed timezone string.", result.unwrap_err());
+        assert_eq!(Err("Malformed timezone string.".to_string()), result);
     }
 
     #[test]
