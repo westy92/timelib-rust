@@ -19,9 +19,9 @@ cargo add timelib
 ## Usage
 
 ```rust
-let tz = timelib::Timezone::parse("America/Chicago".into()).expect("Error parsing timezone!");
-timelib::strtotime("tomorrow".into(), None, &tz);
-timelib::strtotime("next tuesday".into(), Some(1654318823), &tz);
+let tz = timelib::Timezone::parse("America/Chicago").expect("Error parsing timezone!");
+timelib::strtotime("tomorrow", None, &tz);
+timelib::strtotime("next tuesday", Some(1654318823), &tz);
 ```
 
 View the tests for more examples.

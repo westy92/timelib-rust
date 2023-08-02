@@ -23,6 +23,8 @@ fn main() {
         .allowlist_function("timelib_tzinfo_dtor")
         .allowlist_function("timelib_unixtime2local")
         .allowlist_function("timelib_update_ts")
+        .header("shim/shim.h")
+        .allowlist_function("timelib_tz_get_wrapper_cached")
         .generate()
         .expect("failed to run bindgen");
 
@@ -57,12 +59,14 @@ fn main() {
         "pregenerated/parse_date.c",
         #[cfg(not(feature = "re2c"))]
         "pregenerated/parse_iso_intervals.c",
+        "shim/shim.c",
     ];
 
     let mut builder = cc::Build::new();
     let mut build = builder
         .files(src.iter())
         .include("ext/timelib")
+        .include("ext/hashmap.h")
         // taken from Makefile
         .flag("-Wall")
         .define("HAVE_STDINT_H", None)
