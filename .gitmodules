@@ -1,3 +1,6 @@
 [submodule "ext/timelib"]
 	path = ext/timelib
 	url = git@github.com:derickr/timelib.git
+[submodule "ext/hashmap.h"]
+	path = ext/hashmap.h
+	url = https://github.com/sheredom/hashmap.h

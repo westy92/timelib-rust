@@ -42,7 +42,7 @@ pub fn strtotime(
             date_time_c_str.to_bytes().len(),
             error.as_mut_ptr(),
             timelib_builtin_db(),
-            Some(cached_tzfile_wrapper),
+            Some(timelib_tz_get_wrapper_cached),
         );
         let err_count = (*error.assume_init()).error_count;
         timelib_error_container_dtor(error.assume_init());
@@ -65,14 +65,6 @@ pub fn strtotime(
 
         Ok(result)
     }
-}
-
-unsafe extern "C" fn cached_tzfile_wrapper(
-    tz_id: *const i8,
-    db: *const timelib_tzdb,
-    error: *mut i32,
-) -> *mut timelib_tzinfo {
-    timelib_parse_tzfile(tz_id, db, error)
 }
 
 fn rust_now_sec() -> i64 {
