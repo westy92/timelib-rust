@@ -164,6 +164,13 @@ mod tests {
     }
 
     #[test]
+    fn strtotime_valid_date_time_with_timezone_fixed() {
+        let tz = Timezone::parse("UTC").unwrap();
+        let result = strtotime("2006-05-12 13:00:00 America/New_York", None, &tz);
+        assert_eq!(Ok(1147453200), result);
+    }
+
+    #[test]
     fn strtotime_valid_date_time_fixed_timezone() {
         let tz = Timezone::parse("America/Chicago").unwrap();
         let result = strtotime("jun 4 2022", None, &tz);
