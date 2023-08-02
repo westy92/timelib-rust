@@ -160,6 +160,9 @@ mod tests {
         let tz = Timezone::parse("UTC").unwrap();
         let result = strtotime("2006-05-12 13:00:00 America/New_York", None, &tz);
         assert_eq!(Ok(1147453200), result);
+        // Get again - should use underlying TZ cache.
+        let result = strtotime("2006-05-12 13:00:00 America/New_York", None, &tz);
+        assert_eq!(Ok(1147453200), result);
     }
 
     #[test]
