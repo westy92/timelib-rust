@@ -69,6 +69,8 @@ Make sure to regenerate the re2c outputs:
 ```bash
 cd ext/timelib/
 make parse_date.c parse_iso_intervals.c
+cp parse_date.c ../../pregenerated/
+cp parse_iso_intervals.c ../../pregenerated/
 ```
 
 Copy them to `pregenerated/`.

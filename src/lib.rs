@@ -223,6 +223,6 @@ mod tests {
 
     #[test]
     fn timezone_db_version() {
-        assert_eq!("2023.3", Timezone::db_version());
+        assert_eq!("2023.4", Timezone::db_version());
     }
 }
