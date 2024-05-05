@@ -36,7 +36,7 @@ The genereated `re2c` outputs are bundled and automatically used. If you wish to
     - Windows: `choco install re2c`
     - From source: [re2c.org](https://re2c.org/)
 1. Enable the `re2c` feature:
-    - `timelib = { version = "0.2.0", features = ["re2c"] }`
+    - `timelib = { version = "0.3", features = ["re2c"] }`
 
 ## Building
 
