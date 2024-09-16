@@ -73,9 +73,7 @@ fn main() {
         .define("HAVE_GETTIMEOFDAY", None);
 
     if env::var_os("CARGO_CFG_WINDOWS").is_some() {
-        build = build
-            .define("HAVE_DIRENT_H", Some("0"))
-            .define("HAVE_UNISTD_H", Some("0"));
+        build = build.define("HAVE_IO_H", None);
     } else {
         // extra parameters to use in non-Windows
         println!("cargo:rustc-link-lib=m");
