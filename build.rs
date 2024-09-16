@@ -75,7 +75,7 @@ fn main() {
     if env::var_os("CARGO_CFG_WINDOWS").is_some() {
         build = build
             .define("HAVE_DIRENT_H", Some("0"))
-            .define("HAVE_UNISTD_H", Some("0"));
+            .define("HAVE_IO_H", Some("0"));
     } else {
         // extra parameters to use in non-Windows
         println!("cargo:rustc-link-lib=m");
