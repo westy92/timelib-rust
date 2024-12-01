@@ -17,10 +17,7 @@ jobs:
         submodules: recursive
 
     - name: Install latest Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        override: true
+      run: rustup update
 
     - name: Lint
       run: cargo fmt --all -- --check
@@ -57,4 +54,4 @@ jobs:
 
     - name: Upload coverage to Codecov
       if: ${{ matrix.os == 'ubuntu-latest' }}
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v5
