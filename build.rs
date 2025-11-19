@@ -9,30 +9,43 @@ use std::{
 use bindgen::builder;
 
 fn main() {
-    let bindings = builder()
-        .header("ext/timelib/timelib.h")
-        .allowlist_var("TIMELIB_ZONETYPE_ID")
-        .allowlist_var("TIMELIB_NO_CLONE")
-        .allowlist_function("timelib_builtin_db")
-        .allowlist_function("timelib_error_container_dtor")
-        .allowlist_function("timelib_fill_holes")
-        .allowlist_function("timelib_parse_tzfile")
-        .allowlist_function("timelib_strtotime")
-        .allowlist_function("timelib_time_ctor")
-        .allowlist_function("timelib_time_dtor")
-        .allowlist_function("timelib_tzinfo_dtor")
-        .allowlist_function("timelib_unixtime2local")
-        .allowlist_function("timelib_update_ts")
-        .header("shim/shim.h")
-        .allowlist_function("timelib_tz_get_wrapper_cached")
-        .generate()
-        .expect("failed to run bindgen");
-
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_path = PathBuf::from(out_dir.clone());
-    bindings
-        .write_to_file(out_path.join("bindings.rs"))
-        .expect("failed to write bindings.rs");
+
+    // Check if we're building for a musl target (Alpine Linux)
+    let target = env::var("TARGET").unwrap_or_default();
+    let is_musl = target.contains("musl");
+
+    if is_musl {
+        // Use pregenerated bindings for musl targets to avoid bindgen issues
+        // with Alpine's statically-linked Rust toolchain
+        std::fs::copy("pregenerated/bindings.rs", out_path.join("bindings.rs"))
+            .expect("failed to copy pregenerated bindings.rs");
+    } else {
+        // Generate bindings at build time for other targets
+        let bindings = builder()
+            .header("ext/timelib/timelib.h")
+            .allowlist_var("TIMELIB_ZONETYPE_ID")
+            .allowlist_var("TIMELIB_NO_CLONE")
+            .allowlist_function("timelib_builtin_db")
+            .allowlist_function("timelib_error_container_dtor")
+            .allowlist_function("timelib_fill_holes")
+            .allowlist_function("timelib_parse_tzfile")
+            .allowlist_function("timelib_strtotime")
+            .allowlist_function("timelib_time_ctor")
+            .allowlist_function("timelib_time_dtor")
+            .allowlist_function("timelib_tzinfo_dtor")
+            .allowlist_function("timelib_unixtime2local")
+            .allowlist_function("timelib_update_ts")
+            .header("shim/shim.h")
+            .allowlist_function("timelib_tz_get_wrapper_cached")
+            .generate()
+            .expect("failed to run bindgen");
+
+        bindings
+            .write_to_file(out_path.join("bindings.rs"))
+            .expect("failed to write bindings.rs");
+    }
 
     // run re2c on 2 files
     #[cfg(feature = "re2c")]
@@ -78,9 +91,13 @@ fn main() {
         // extra parameters to use in non-Windows
         println!("cargo:rustc-link-lib=m");
 
+        // Use -g instead of -ggdb3 for musl targets (Alpine Linux)
+        // as musl's gcc doesn't support -ggdb3
+        let debug_flag = if is_musl { "-g" } else { "-ggdb3" };
+
         build = build
             .flag("-O0")
-            .flag("-ggdb3")
+            .flag(debug_flag)
             .flag("-fdiagnostics-show-option")
             .flag("-fno-exceptions")
             .flag("-fno-omit-frame-pointer")
