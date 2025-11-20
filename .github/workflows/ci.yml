@@ -57,12 +57,14 @@ jobs:
       if: ${{ matrix.alpine }}
       env:
         CC: musl-gcc
+        CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: musl-gcc
       run: cargo test --target x86_64-unknown-linux-musl
 
     - name: Build and Test (Alpine/musl with re2c)
       if: ${{ matrix.alpine }}
       env:
         CC: musl-gcc
+        CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: musl-gcc
       run: cargo test --target x86_64-unknown-linux-musl --features re2c
 
     - name: Build and Test (Coverage)
