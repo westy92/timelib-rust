@@ -26,9 +26,25 @@ timelib::strtotime("next tuesday", Some(1654318823), &tz);
 
 View the tests for more examples.
 
+## Alpine Linux / musl Support
+
+This library works out-of-the-box on Alpine Linux (musl libc). The build system automatically detects musl targets and:
+
+- Uses pregenerated FFI bindings (avoiding bindgen issues with Alpine's statically-linked Rust)
+- Adjusts compiler flags for musl compatibility
+- Statically compiles all C code into the binary (no external shared libraries needed besides `libm`)
+
+On Alpine Linux:
+
+```bash
+apk add musl-dev
+cargo build
+cargo test
+```
+
 ## Optional Features
 
-The genereated `re2c` outputs are bundled and automatically used. If you wish to generate these files yourself, do the following:
+The generated `re2c` outputs are bundled and automatically used. If you wish to generate these files yourself, do the following:
 
 1. Install `re2c`. You can install it easily on all major platforms:
     - Linux: `apt-get install re2c`
@@ -64,9 +80,17 @@ If using the `re2c` feature, make sure to install `re2c` as described above. i.e
 git submodule update --remote
 ```
 
-Make sure to regenerate the re2c outputs and copy them to `pregenerated/`.
+Make sure to regenerate the re2c outputs and bindings, then copy them to `pregenerated/`.
 
 ```bash
+# Clean and build to generate fresh bindings
+cargo clean
+cargo build
+
+# Copy generated bindings from build output
+cp target/debug/build/timelib-*/out/bindings.rs pregenerated/bindings.rs
+
+# Regenerate re2c outputs
 cd ext/timelib/
 make parse_date.c parse_iso_intervals.c
 cp parse_date.c ../../pregenerated/

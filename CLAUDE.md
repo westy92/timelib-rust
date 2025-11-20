@@ -31,6 +31,7 @@ The build process is complex and involves:
 
 - **Non-Windows**: Links against `libm`, includes debug flags, stack protector, pedantic warnings
 - **Windows**: Defines `HAVE_IO_H` instead of Unix headers
+- **musl/Alpine Linux**: Uses `-g` flag instead of `-ggdb3` for compatibility with musl libc; uses pregenerated bindings to avoid bindgen issues with Alpine's statically-linked Rust
 
 ## Common Commands
 
@@ -45,6 +46,15 @@ cargo test
 
 # Build with re2c generation (requires re2c installed)
 cargo test --features re2c
+
+# Build for Alpine Linux (musl target)
+# On Alpine Linux, install build dependencies first:
+apk add musl-dev
+cargo build
+cargo test
+
+# The library automatically detects musl targets and uses pregenerated
+# bindings to avoid bindgen dependency issues with Alpine's statically-linked Rust.
 
 # Lint
 cargo fmt --all -- --check
@@ -93,6 +103,11 @@ cargo publish
 ## Important Notes
 
 - The shim layer provides timezone caching to avoid repeatedly parsing timezone files
-- Bindings are regenerated on every build via build.rs
+- Bindings are regenerated on every build via build.rs (except for musl targets which use pregenerated bindings)
 - The `re2c` feature is optional; pregenerated files make the crate buildable without extra tools
 - Must maintain git submodules (timelib and hashmap.h) for builds to work
+- **Alpine Linux/musl**: The library is fully compatible with musl libc (Alpine Linux). The build system automatically detects musl targets and:
+  - Uses pregenerated bindings instead of running bindgen (avoids issues with Alpine's statically-linked Rust)
+  - Adjusts compiler flags (`-g` instead of `-ggdb3`)
+  - Compiles C code statically into the binary (no external shared libraries needed besides `libm`)
+  - On Alpine Linux, simply use standard `cargo build` and `cargo test` commands after installing `musl-dev`
